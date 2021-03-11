@@ -6,7 +6,7 @@ import sys
 
 cwd = os.path.dirname(os.path.realpath(__file__))
 
-class AlHideUnhideFolder():
+class AlInvisibleCloak():
     def __init__(self, operation):
         root = Tk(className = " ALINVISIBLECLOAK ")
         root.geometry("450x200+1460+815")
@@ -74,4 +74,4 @@ class AlHideUnhideFolder():
         root.mainloop()
 
 if __name__ == "__main__":
-    AlHideUnhideFolder(sys.argv[1]) 
+    AlInvisibleCloak(sys.argv[1]) 
