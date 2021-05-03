@@ -10,6 +10,7 @@ class AlInvisibleCloak():
     def __init__(self, operation):
         root = Tk(className = " ALINVISIBLECLOAK ")
         root.geometry("450x200+1460+815")
+        root.resizable(0,0)
         root.iconbitmap(os.path.join(cwd+'\\UI\\icons', 'alinvisiblecloak.ico'))
         if operation.lower() == 'hide':
             opr = 'Attrib +h /s /d'
