@@ -1,6 +1,7 @@
 from tkinter import *
 from tkinter import font
 import os
+from PIL import ImageTk, Image
 import pyttsx3
 import sys
 
@@ -9,9 +10,10 @@ cwd = os.path.dirname(os.path.realpath(__file__))
 class AlInvisibleCloak():
     def __init__(self, operation):
         root = Tk(className = " ALINVISIBLECLOAK ")
-        root.geometry("450x200+1460+815")
+        root.geometry("450x250+1460+800")
         root.resizable(0,0)
         root.iconbitmap(os.path.join(cwd+'\\UI\\icons', 'alinvisiblecloak.ico'))
+        root.overrideredirect(1)
         if operation.lower() == 'hide':
             opr = 'Attrib +h /s /d'
             response = "hidden"
@@ -20,6 +22,20 @@ class AlInvisibleCloak():
             opr = 'Attrib -h -s /s /d'
             response = "unhidden"
             root.attributes('-alpha',1)
+
+        def callback(event):
+            root.geometry("450x250+1460+800")
+
+        def showScreen(event):
+            root.deiconify()
+            root.overrideredirect(1)
+
+        def screenAppear(event):
+            root.overrideredirect(1)
+
+        def hideScreen():
+            root.overrideredirect(0)
+            root.iconify()
 
         def speak(audio):
             engine = pyttsx3.init('sapi5')
@@ -43,35 +59,59 @@ class AlInvisibleCloak():
                 text.insert(1.0, f"Folder is now {response}")
                 speak(f"Folder is now {response}")
 
-        appHighlightFont = font.Font(family='sans-serif', size=12, weight='bold')
-        textHighlightFont = font.Font(family='Segoe UI', size=12, weight='bold')
+        textHighlightFont = font.Font(family='OnePlus Sans Display', size=12)
+        appHighlightFont = font.Font(family='OnePlus Sans Display', size=12, weight='bold')
+
+        titleBar = Frame(root, bg='#141414', relief=SUNKEN, bd=0)
+        icon = Image.open(os.path.join(cwd+'\\UI\\icons', 'alinvisiblecloak.ico'))
+        icon = icon.resize((30,30), Image.ANTIALIAS)
+        icon = ImageTk.PhotoImage(icon)
+        iconLabel = Label(titleBar, image=icon)
+        iconLabel.photo = icon
+        iconLabel.config(bg='#141414')
+        iconLabel.grid(row=0,column=0,sticky="nsew")
+        titleLabel = Label(titleBar, text='ALINVISIBLECLOAK', fg='#909090', bg='#141414', font=appHighlightFont)
+        titleLabel.grid(row=0,column=1,sticky="nsew")
+        closeButton = Button(titleBar, text="x", bg='#141414', fg="#909090", borderwidth=0, command=root.destroy, font=appHighlightFont)
+        closeButton.grid(row=0,column=3,sticky="nsew")
+        minimizeButton = Button(titleBar, text="-", bg='#141414', fg="#909090", borderwidth=0, command=hideScreen, font=appHighlightFont)
+        minimizeButton.grid(row=0,column=2,sticky="nsew")
+        titleBar.grid_columnconfigure(0,weight=1)
+        titleBar.grid_columnconfigure(1,weight=50)
+        titleBar.grid_columnconfigure(2,weight=1)
+        titleBar.grid_columnconfigure(3,weight=1)
+        titleBar.pack(fill=X)
 
         folderPath = Label(root, text = "FOLDER PATH")
         folderPath.pack()
-        folderPath.config(font=textHighlightFont)
+        folderPath.config(font=appHighlightFont)
         folderPath= Entry(root, highlightthickness=3, bd=0,font=appHighlightFont)
         folderPath.pack(fill=X)
 
         ask = Label(root, text = f'DO YOU WANT TO {operation.upper()} SUB FOLDERS AND FILES ALSO?')
         ask.pack(fill=X,pady=5)
-        ask.config(font=textHighlightFont)
+        ask.config(font=appHighlightFont)
 
         confirm = Label(root)
         confirm.pack(fill=X)
-        confirm.config(font=textHighlightFont)
+        confirm.config(font=appHighlightFont)
         var = IntVar()
         radioYes = Radiobutton(confirm, text="Yes", variable=var, value=1, command=folderOperation)
-        radioYes.config(font=textHighlightFont)
+        radioYes.config(font=appHighlightFont)
         radioYes.grid(column=0,row=0,padx=70)
 
         radioNo = Radiobutton(confirm, text="No", variable=var, value=2, command=folderOperation)
-        radioNo.config(font=textHighlightFont)
+        radioNo.config(font=appHighlightFont)
         radioNo.grid(column =1,row=0,padx=70)
         
         text = Text(root, font="sans-serif",  relief=SUNKEN , highlightthickness=5, bd=0)
-        text.config(height=2, font=appHighlightFont)
+        text.config(height=2, font=textHighlightFont)
         text.pack(fill=BOTH, expand=True)
         
+        titleBar.bind("<B1-Motion>", callback)
+        titleBar.bind("<Button-3>", showScreen)
+        titleBar.bind("<Map>", screenAppear)
+
         root.mainloop()
 
 if __name__ == "__main__":
