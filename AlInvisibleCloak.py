@@ -1,8 +1,7 @@
 from tkinter import *
-from tkinter import font
+from tkinter import font, filedialog
 import os
 from PIL import ImageTk, Image
-import pyttsx3
 import sys
 
 cwd = os.path.dirname(os.path.realpath(__file__))
@@ -10,7 +9,7 @@ cwd = os.path.dirname(os.path.realpath(__file__))
 class AlInvisibleCloak():
     def __init__(self, operation):
         root = Tk(className = " ALINVISIBLECLOAK ")
-        root.geometry("450x250+1460+800")
+        root.geometry("500x250+1410+780")
         root.resizable(0,0)
         root.iconbitmap(os.path.join(cwd+'\\UI\\icons', 'alinvisiblecloak.ico'))
         root.overrideredirect(1)
@@ -37,27 +36,30 @@ class AlInvisibleCloak():
             root.overrideredirect(0)
             root.iconify()
 
-        def speak(audio):
-            engine = pyttsx3.init('sapi5')
-            voices = engine.getProperty('voices')
-            engine.setProperty('voice', voices[0].id)
-            engine.say(audio)
-            engine.runAndWait()
+        def getFile():
+            folderPathEntry.delete(1.0, END)
+            filename = filedialog.askdirectory()
+            folderPathEntry.insert(1.0, filename)
 
         def folderOperation():
             text.delete(1.0, END)
             selection = var.get()
-            path = folderPath.get()
+            path = folderPathEntry.get("1.0", END)
+            path = path.replace('/', '\\')[:-1]
             if selection == 1:
                 os.system(f'{opr} "{path}"')
                 path = path+'\*'
                 os.system(f'{opr} "{path}"')
                 text.insert(1.0, f"Folder and it's sub folders and files are now {response}")
-                speak(f"Folder and it's sub folders and files are now {response}")
             elif selection == 2:
                 os.system(f'{opr} "{path}"')
+                if operation.lower() == 'hide':
+                    path = path+'\*'
+                    os.system(f'Attrib -h -s /s /d "{path}"')
+                elif operation.lower() == 'unhide':
+                    path = path+'\*'
+                    os.system(f'Attrib +h /s /d "{path}"')
                 text.insert(1.0, f"Folder is now {response}")
-                speak(f"Folder is now {response}")
 
         textHighlightFont = font.Font(family='OnePlus Sans Display', size=12)
         appHighlightFont = font.Font(family='OnePlus Sans Display', size=12, weight='bold')
@@ -82,11 +84,11 @@ class AlInvisibleCloak():
         titleBar.grid_columnconfigure(3,weight=1)
         titleBar.pack(fill=X)
 
-        folderPath = Label(root, text = "FOLDER PATH")
-        folderPath.pack()
-        folderPath.config(font=appHighlightFont)
-        folderPath= Entry(root, highlightthickness=3, bd=0,font=appHighlightFont)
+        folderPath = Button(root, text = "FOLDER PATH", borderwidth=0, highlightthickness=3, command=getFile)
         folderPath.pack(fill=X)
+        folderPath.config(font=appHighlightFont)
+        folderPathEntry = Text(root, highlightthickness=3, bd=0, font=appHighlightFont, height=1)
+        folderPathEntry.pack(fill=BOTH, expand=True)
 
         ask = Label(root, text = f'DO YOU WANT TO {operation.upper()} SUB FOLDERS AND FILES ALSO?')
         ask.pack(fill=X,pady=5)
