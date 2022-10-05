@@ -4,8 +4,10 @@ from tkinter import (font, filedialog, Button, Label, IntVar,
 import os
 from PIL import ImageTk, Image
 import sys
+import platform
 
 cwd = os.path.dirname(os.path.realpath(__file__))
+systemName = platform.system()
 
 
 class AlInvisibleCloak():
@@ -13,17 +15,27 @@ class AlInvisibleCloak():
         root = Tk(className=" ALINVISIBLECLOAK ")
         root.geometry("500x250+1410+780")
         root.resizable(0, 0)
-        root.iconbitmap(os.path.join(cwd+'\\UI\\icons',
-                                     'alinvisiblecloak.ico'))
+        iconPath = os.path.join(cwd+'\\UI\\icons',
+                                'alinvisiblecloak.ico')
+        if systemName == 'Darwin':
+            iconPath = iconPath.replace('\\','/')
+        root.iconbitmap(iconPath)
         root.overrideredirect(1)
         if operation.lower() == 'hide':
-            opr = 'Attrib +h /s /d'
+            if systemName == 'Darwin':
+                opr = 'chflags hidden'
+            elif systemName == 'Windows':
+                opr = 'Attrib +h /s /d'
             response = "hidden"
             root.attributes('-alpha', 0.6)
         elif operation.lower() == 'unhide':
-            opr = 'Attrib -h -s /s /d'
+            if systemName == 'Darwin':
+                opr = 'chflags nohidden'
+            elif systemName == 'Windows':
+                opr = 'Attrib -h -s /s /d'
             response = "unhidden"
             root.attributes('-alpha', 1)
+        self.opr = opr
 
         def liftWindow():
             root.lift()
@@ -48,25 +60,47 @@ class AlInvisibleCloak():
             filename = filedialog.askdirectory()
             folderPathEntry.insert(1.0, filename)
 
+        def subFolderOperation(path, eopr):
+            for root, _, files in os.walk(path):
+                if '.git' not in root:
+                    if root != path: 
+                        os.system(f'{eopr} "{root}"')
+                    for file in files:
+                        os.system(f'{eopr} "{root}/{file}"')
+
         def folderOperation():
             text.delete(1.0, END)
             selection = var.get()
             path = folderPathEntry.get("1.0", END)
             path = path.replace('/', '\\')[:-1]
+            if systemName == 'Darwin':
+                path = path.replace('\\','/')
+            opr = self.opr
             if selection == 1:
                 os.system(f'{opr} "{path}"')
-                path = path+'\\*'
-                os.system(f'{opr} "{path}"')
+                if systemName == 'Windows':
+                    path = path+'\\*'
+                    os.system(f'{opr} "{path}"')
+                elif systemName == 'Darwin':
+                    subFolderOperation(path, opr)
                 text.insert(1.0, "Folder and it's sub folders and files are " +
                             f"now {response}")
             elif selection == 2:
                 os.system(f'{opr} "{path}"')
                 if operation.lower() == 'hide':
-                    path = path+'\\*'
-                    os.system(f'Attrib -h -s /s /d "{path}"')
+                    if systemName == 'Windows':
+                        path = path+'\\*'
+                        os.system(f'Attrib -h -s /s /d "{path}"')
+                    elif systemName == 'Darwin':
+                        opr = 'chflags nohidden'
+                        subFolderOperation(path, opr)
                 elif operation.lower() == 'unhide':
-                    path = path+'\\*'
-                    os.system(f'Attrib +h /s /d "{path}"')
+                    if systemName == 'Windows':
+                        path = path+'\\*'
+                        os.system(f'Attrib +h /s /d "{path}"')
+                    elif systemName == 'Darwin':
+                        opr = 'chflags hidden'
+                        subFolderOperation(path, opr)
                 text.insert(1.0, f"Folder is now {response}")
 
         textHighlightFont = font.Font(family='OnePlus Sans Display', size=12)
@@ -74,8 +108,7 @@ class AlInvisibleCloak():
                                      weight='bold')
 
         titleBar = Frame(root, bg='#141414', relief=SUNKEN, bd=0)
-        icon = Image.open(os.path.join(cwd+'\\UI\\icons',
-                                       'alinvisiblecloak.ico'))
+        icon = Image.open(iconPath)
         icon = icon.resize((30, 30), Image.ANTIALIAS)
         icon = ImageTk.PhotoImage(icon)
         iconLabel = Label(titleBar, image=icon)
